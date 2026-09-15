@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arjena · Aguas de Sabor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #2b1e15; --ink-soft: #6b5340; --ink-muted: #a08b73;
+    --paper: #f4ebde; --paper-dark: #e8d9c2;
+    --accent: #b8672e; --accent-dark: #8f4a1c; --accent-light: #f2d9b8;
+    --line: rgba(43,30,21,0.15);
+    --success: #6b7c3a; --danger: #a63a2c; --metal: #8b7355;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; padding: 2rem 1rem 4rem;
+    background-image: radial-gradient(circle at 20% 10%, rgba(184,103,46,0.05) 0%, transparent 50%), radial-gradient(circle at 80% 90%, rgba(139,115,85,0.05) 0%, transparent 50%); }
+  .header { max-width: 680px; margin: 0 auto 2.5rem; display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 1.5rem; border-bottom: 2px solid var(--ink); }
+  .header-left .eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-weight: 500; }
+  .header-left h1 { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--ink); }
+  .header-left h1 span { color: var(--accent); font-style: italic; font-weight: 400; display: block; font-size: 16px; letter-spacing: 0.05em; margin-top: 4px; text-transform: uppercase; }
+  .header-right { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-muted); text-align: right; }
+  .header-right a { color: var(--accent); text-decoration: none; display: inline-block; margin-top: 4px; }
+  .header-right a:hover { text-decoration: underline; }
+
+  .form-card { max-width: 680px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--accent); box-shadow: 0 2px 12px rgba(43,30,21,0.06); }
+  .form-section { padding: 1.75rem 2rem; border-bottom: 1px solid var(--line); }
+  .form-section.hidden { display: none; }
+  .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--metal); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+  .section-label::before { content: ''; width: 20px; height: 2px; background: var(--accent); }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  .field.hidden { display: none; }
+  label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+
+  input, select, textarea { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); padding: 11px 12px; outline: none; transition: all 0.15s; width: 100%; border-radius: 0; -webkit-appearance: none; appearance: none; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b5340' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
+  textarea { resize: vertical; min-height: 70px; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(184,103,46,0.1); }
+  input::placeholder, textarea::placeholder { color: var(--ink-muted); }
+
+  .amount-wrap { position: relative; }
+  .amount-wrap .currency { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 500; pointer-events: none; }
+  .amount-wrap input { padding-left: 28px; font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
+
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-chip { position: relative; }
+  .radio-chip input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-chip label { display: block; padding: 10px 18px; background: var(--paper); border: 1px solid var(--line); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .radio-chip input[type="radio"]:checked + label { background: var(--ink); border-color: var(--ink); color: var(--paper-dark); }
+  .radio-chip.ingreso input[type="radio"]:checked + label { background: var(--success); border-color: var(--success); color: #fff; }
+  .radio-chip.gasto input[type="radio"]:checked + label { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .radio-chip label:hover { border-color: var(--metal); color: var(--ink); }
+
+  .total-display { background: var(--accent-light); border: 1px solid var(--accent); padding: 12px 16px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .total-display .total-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-dark); }
+  .total-display .total-value { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--ink); }
+
+  .submit-area { padding: 1.75rem 2rem; background: var(--paper-dark); display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line); }
+  .submit-hint { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
+  .btn-submit { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; color: #fff; background: var(--accent); border: none; padding: 14px 28px; cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; box-shadow: 0 2px 0 var(--accent-dark); }
+  .btn-submit:hover { background: var(--accent-dark); }
+  .btn-submit:active { transform: translateY(2px); box-shadow: none; }
+  .btn-submit:disabled { background: var(--ink-muted); cursor: not-allowed; box-shadow: none; }
+
+  .toast { display: none; max-width: 680px; margin: 1.5rem auto 0; padding: 1rem 1.5rem; border-left: 4px solid var(--success); background: #f4f6ec; font-size: 14px; color: var(--success); font-weight: 500; }
+  .toast.error { border-color: var(--danger); background: #f9ece9; color: var(--danger); }
+
+  @media (max-width: 560px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .submit-area { flex-direction: column; align-items: stretch; }
+    .header-left h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <p class="eyebrow">Registro de operaciones</p>
+    <h1>Arjena<span>Aguas de sabor</span></h1>
+  </div>
+  <div class="header-right">
+    <div id="current-date"></div>
+    <a href="dashboard.html">Ver dashboard →</a>
+  </div>
+</div>
+
+<div class="form-card">
+
+  <div class="form-section">
+    <div class="section-label">01 · Movimiento</div>
+    <div class="field" style="margin-bottom: 1rem;">
+      <label>Tipo</label>
+      <div class="radio-group">
+        <div class="radio-chip ingreso"><input type="radio" id="t_ingreso" name="tipo_movimiento" value="Ingreso" onchange="onTipoChange()"><label for="t_ingreso">Ingreso (venta)</label></div>
+        <div class="radio-chip gasto"><input type="radio" id="t_gasto" name="tipo_movimiento" value="Gasto" onchange="onTipoChange()"><label for="t_gasto">Gasto</label></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+      <div class="field" id="fld-punto-venta">
+        <label for="punto_venta">Punto de venta</label>
+        <input type="text" id="punto_venta" placeholder="Ej: Puesto tacos Don Chuy">
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección tipo de gasto: solo visible en Gasto -->
+  <div class="form-section hidden" id="sec-tipo-gasto">
+    <div class="section-label">02 · Tipo de gasto</div>
+    <div class="field">
+      <div class="radio-group">
+        <div class="radio-chip"><input type="radio" id="tg_insumo" name="tipo_gasto" value="Insumo"><label for="tg_insumo">Insumo</label></div>
+        <div class="radio-chip"><input type="radio" id="tg_operativo" name="tipo_gasto" value="Operativo"><label for="tg_operativo">Operativo</label></div>
+        <div class="radio-chip"><input type="radio" id="tg_inversion" name="tipo_gasto" value="Inversión"><label for="tg_inversion">Inversión</label></div>
+      </div>
+      <p style="font-size:11px;color:var(--ink-muted);margin-top:8px;line-height:1.5;">
+        <strong>Insumo:</strong> materia prima (jamaica, azúcar, botellas...) ·
+        <strong>Operativo:</strong> sueldos, gasolina, renta, luz... ·
+        <strong>Inversión:</strong> equipo o herramienta (compra única)
+      </p>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label" id="lbl-detalle">02 · Detalle</div>
+    <div class="grid-2">
+      <div class="field full">
+        <label for="concepto">Concepto</label>
+        <input type="text" id="concepto" placeholder="Selecciona tipo arriba primero" list="conceptos-list">
+        <datalist id="conceptos-list"></datalist>
+      </div>
+      <div class="field">
+        <label for="cantidad">Cantidad (litros / piezas)</label>
+        <input type="number" id="cantidad" placeholder="Ej: 5" min="0" step="0.01" oninput="calcularTotal()">
+      </div>
+      <div class="field">
+        <label for="precio_unitario">Precio unitario</label>
+        <div class="amount-wrap">
+          <span class="currency">$</span>
+          <input type="number" id="precio_unitario" placeholder="0.00" min="0" step="0.01" oninput="calcularTotal()">
+        </div>
+      </div>
+      <div class="field full">
+        <div class="total-display">
+          <span class="total-label">Monto total (calculado)</span>
+          <span class="total-value" id="total-display">$0.00</span>
+        </div>
+      </div>
+      <div class="field full">
+        <label for="monto_total_manual">O ajustar manualmente (opcional)</label>
+        <div class="amount-wrap">
+          <span class="currency">$</span>
+          <input type="number" id="monto_total_manual" placeholder="Deja vacío para usar el cálculo" min="0" step="0.01">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label">03 · Forma de pago</div>
+    <div class="field">
+      <div class="radio-group">
+        <div class="radio-chip"><input type="radio" id="p_efectivo" name="forma_pago" value="Efectivo"><label for="p_efectivo">Efectivo</label></div>
+        <div class="radio-chip"><input type="radio" id="p_transferencia" name="forma_pago" value="Transferencia"><label for="p_transferencia">Transferencia</label></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label">04 · Notas</div>
+    <div class="field">
+      <label for="notas">Observaciones (opcional)</label>
+      <textarea id="notas" placeholder="Cualquier detalle relevante..."></textarea>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <p class="submit-hint">El registro se guarda<br>automáticamente en la nube.</p>
+    <button type="button" class="btn-submit" id="btn-submit" onclick="submitForm()">Registrar →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz583Sdk5x8397G90G9Ng0BHLFFBdUcyzrFLKbtqWErZKqRor4IApKh8Z21hSS_qZz6yQ/exec';
+
+  // Sugerencias por tipo
+  var SUGERENCIAS = {
+    Ingreso: ['Jamaica', 'Horchata', 'Mixto (jamaica + horchata)', 'Otro sabor'],
+    Insumo: ['Jamaica (flor)', 'Arroz', 'Azúcar', 'Vainilla', 'Canela', 'Etiquetas', 'Botellas', 'Hielo', 'Agua purificada'],
+    Operativo: ['Sueldo ayudante', 'Gasolina', 'Renta puesto', 'Luz / electricidad', 'Gas', 'Internet / celular', 'Transporte', 'Publicidad'],
+    'Inversión': ['Licuadora', 'Bote 40L', 'Colador', 'Hielera', 'Mesa / silla', 'Utensilios']
+  };
+
+  document.getElementById('fecha').valueAsDate = new Date();
+  document.getElementById('current-date').textContent =
+    new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  function onTipoChange() {
+    var tipo = radioVal('tipo_movimiento');
+    var secGasto = document.getElementById('sec-tipo-gasto');
+    var puntoVentaWrap = document.getElementById('fld-punto-venta');
+    var lblDetalle = document.getElementById('lbl-detalle');
+    var concepto = document.getElementById('concepto');
+
+    if (tipo === 'Gasto') {
+      secGasto.classList.remove('hidden');
+      puntoVentaWrap.classList.add('hidden');
+      document.getElementById('punto_venta').value = '';
+      lblDetalle.textContent = '03 · Detalle';
+      concepto.placeholder = 'Selecciona tipo de gasto arriba';
+      actualizarSugerencias();
+    } else if (tipo === 'Ingreso') {
+      secGasto.classList.add('hidden');
+      puntoVentaWrap.classList.remove('hidden');
+      // Limpiar radio tipo gasto
+      document.querySelectorAll('input[name="tipo_gasto"]').forEach(function(r){r.checked=false;});
+      lblDetalle.textContent = '02 · Detalle';
+      concepto.placeholder = 'Ej: Jamaica, Horchata...';
+      llenarDatalist(SUGERENCIAS.Ingreso);
+    } else {
+      secGasto.classList.add('hidden');
+      puntoVentaWrap.classList.remove('hidden');
+      lblDetalle.textContent = '02 · Detalle';
+      concepto.placeholder = 'Selecciona tipo arriba primero';
+      llenarDatalist([]);
+    }
+  }
+
+  function actualizarSugerencias() {
+    var tipoGasto = radioVal('tipo_gasto');
+    var concepto = document.getElementById('concepto');
+    if (tipoGasto && SUGERENCIAS[tipoGasto]) {
+      concepto.placeholder = 'Ej: ' + SUGERENCIAS[tipoGasto].slice(0, 2).join(', ') + '...';
+      llenarDatalist(SUGERENCIAS[tipoGasto]);
+    }
+  }
+
+  // Escuchar cambios en tipo de gasto
+  document.querySelectorAll('input[name="tipo_gasto"]').forEach(function(r) {
+    r.addEventListener('change', actualizarSugerencias);
+  });
+
+  function llenarDatalist(opciones) {
+    var dl = document.getElementById('conceptos-list');
+    dl.innerHTML = '';
+    opciones.forEach(function(op) {
+      var o = document.createElement('option');
+      o.value = op;
+      dl.appendChild(o);
+    });
+  }
+
+  function calcularTotal() {
+    var cant = parseFloat(document.getElementById('cantidad').value) || 0;
+    var pu = parseFloat(document.getElementById('precio_unitario').value) || 0;
+    var total = cant * pu;
+    document.getElementById('total-display').textContent =
+      '$' + total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function showToast(msg, isError) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = isError ? 'toast error' : 'toast';
+    t.style.display = 'block';
+    t.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(function() { t.style.display = 'none'; }, 6000);
+  }
+
+  function val(id) { return document.getElementById(id).value.trim(); }
+  function radioVal(name) {
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : '';
+  }
+
+  function getMontoTotal() {
+    var manual = parseFloat(val('monto_total_manual'));
+    if (!isNaN(manual) && manual > 0) return manual;
+    var cant = parseFloat(val('cantidad')) || 0;
+    var pu = parseFloat(val('precio_unitario')) || 0;
+    return cant * pu;
+  }
+
+  function validateForm() {
+    if (!radioVal('tipo_movimiento')) return 'Selecciona si es Ingreso o Gasto.';
+    if (radioVal('tipo_movimiento') === 'Gasto' && !radioVal('tipo_gasto'))
+      return 'Selecciona el tipo de gasto (Insumo / Operativo / Inversión).';
+    if (!val('fecha'))    return 'La fecha es requerida.';
+    if (!val('concepto')) return 'Escribe o selecciona el concepto.';
+    var total = getMontoTotal();
+    if (total <= 0) return 'Ingresa cantidad y precio, o un monto total manual.';
+    return null;
+  }
+
+  function resetForm() {
+    ['punto_venta','concepto','cantidad','precio_unitario','monto_total_manual','notas']
+      .forEach(function(id) { document.getElementById(id).value = ''; });
+    document.querySelectorAll('input[type="radio"]').forEach(function(r) { r.checked = false; });
+    document.getElementById('fecha').valueAsDate = new Date();
+    document.getElementById('total-display').textContent = '$0.00';
+    onTipoChange();
+  }
+
+  function finalizarEnvio(btn) {
+    enviando = false;
+    btn.disabled = false;
+    btn.textContent = 'Registrar →';
+    showToast('✓ Movimiento registrado correctamente.', false);
+    resetForm();
+  }
+
+  var enviando = false;
+
+  function submitForm() {
+    if (enviando) return;
+    var error = validateForm();
+    if (error) { showToast('⚠ ' + error, true); return; }
+
+    var btn = document.getElementById('btn-submit');
+    enviando = true;
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    var params = new URLSearchParams({
+      timestamp:        new Date().toISOString(),
+      fecha:            val('fecha'),
+      punto_venta:      val('punto_venta'),
+      tipo_movimiento:  radioVal('tipo_movimiento'),
+      tipo_gasto:       radioVal('tipo_gasto'),
+      concepto:         val('concepto'),
+      cantidad:         val('cantidad'),
+      precio_unitario:  val('precio_unitario'),
+      monto_total:      getMontoTotal().toFixed(2),
+      forma_pago:       radioVal('forma_pago'),
+      notas:            val('notas')
+    });
+
+    fetch(APPS_SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
+      .then(function() { finalizarEnvio(btn); })
+      .catch(function() { finalizarEnvio(btn); });
+  }
+</script>
+</body>
+</html>
